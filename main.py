@@ -44,7 +44,7 @@ def say_help():
         screen.blit(dialog_box, [0, 450])
         screen.blit(little.render("胡:", True, (0, 0, 0)), [20, 470])
         text = little.render("那是......", True, (0, 0, 0))
-        screen.blit(text, [30, 510])
+        screen.blit(text, [30, 500])
     elif footprint == 31:
         box_appear("!", middle, 'h')
     elif footprint <= 60:
@@ -96,6 +96,14 @@ class player_class(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = location
 
     def move(self, speed):
+        global game_progress
+
+        if self.rect[0] > 480 and self.rect[1] > 420:
+            game_progress = "find medicine c"
+            shen.rect[0] = 800
+            player.rect[0] = 300
+            player.rect[1] = 300
+
         if speed[0] > 0 and self.rect[0] < width - self.rect[2]:
             self.rect = self.rect.move(speed)
         elif speed[0] < 0 < self.rect[0]:
@@ -165,7 +173,7 @@ if __name__ == '__main__':
     '''
 
     pygame.init()
-    pygame.key.set_repeat(1, int(1000/30))
+    pygame.key.set_repeat(1, int(1000 / 30))
 
     if_mouse_bottom_down = True
     wait_for_mouse = False
@@ -190,19 +198,21 @@ if __name__ == '__main__':
     shen = shen_class((shen_start_x, shen_start_y))
     clock = pygame.time.Clock()
 
-    large = pygame.font.Font('./xsz.ttf', 80)
-    middle = pygame.font.Font('./xsz.ttf', 40)
-    little = pygame.font.Font('./xsz.ttf', 20)
+    large = pygame.font.Font('C:/Windows/Fonts/simfang.ttf', 80)
+    middle = pygame.font.Font('C:/Windows/Fonts/simfang.ttf', 40)
+    little = pygame.font.Font('C:/Windows/Fonts/simfang.ttf', 20)
 
     dialog_box = pygame.transform.scale(pygame.image.load("dialog box.png"), (width, 150))
     playground_surface = pygame.transform.scale(pygame.image.load("playground.jpg"), (width, height))
     playground_surface2 = pygame.transform.scale(pygame.image.load("playground2.jpg"), (width, height))
+    classroom_surface = pygame.transform.scale(pygame.image.load("classroom.jpg"), (width, height))
 
     background = {"walking": playground_surface,
                   "shen is running": playground_surface,
                   "shen is dying": playground_surface,
                   "say help": playground_surface,
-                  "find medicine p": playground_surface2
+                  "find medicine p": playground_surface2,
+                  "find medicine c": classroom_surface
                   }
 
     screen = pygame.display.set_mode((width, height))
@@ -259,9 +269,7 @@ if __name__ == '__main__':
                 if footprint == 68:
                     game_progress = "find medicine p"
                     footprint = 0
-
-            elif game_progress == "find medicine p" or game_progress == "find medicine c":
-                allow_self_move = True
+                    allow_self_move = True
 
             screen.blit(shen.image, shen.rect)  # shen显示
             screen.blit(player.image, player.rect)  # 玩家显示
