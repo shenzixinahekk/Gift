@@ -98,23 +98,36 @@ class player_class(pygame.sprite.Sprite):
     def move(self, speed):
         global game_progress
 
-        if self.rect[0] > 480 and self.rect[1] > 420:
+        if self.rect[0] > 480 and self.rect[1] > 420 and game_progress == "find medicine p":
             game_progress = "find medicine c"
             shen.rect[0] = 800
-            player.rect[0] = 300
+            player.rect[0] = 315
             player.rect[1] = 300
 
-        if speed[0] > 0 and self.rect[0] < width - self.rect[2]:
-            self.rect = self.rect.move(speed)
-        elif speed[0] < 0 < self.rect[0]:
-            self.rect = self.rect.move(speed)
-        elif speed[1] > 0 and self.rect[1] < height - self.rect[3]:
-            self.rect = self.rect.move(speed)
-        elif speed[1] < 0 < self.rect[1]:
-            self.rect = self.rect.move(speed)
+        if game_progress != "find medicine c":
+            if speed[0] > 0 and self.rect[0] < width - self.rect[2]:
+                self.rect = self.rect.move(speed)
+            elif speed[0] < 0 < self.rect[0]:
+                self.rect = self.rect.move(speed)
+            elif speed[1] > 0 and self.rect[1] < height - self.rect[3] + 12:
+                self.rect = self.rect.move(speed)
+            elif speed[1] < 0 < self.rect[1]:
+                self.rect = self.rect.move(speed)
+
+        elif game_progress == "find medicine c":
+            degree = 1
+            if speed[1] > 0 and self.rect[1] < height - self.rect[3] + 20:
+                self.rect[2] += degree
+                self.rect[3] += degree
+                speed[0] -= 1.5
+                self.rect = self.rect.move(speed)
+            elif speed[1] < 0 and 300 < self.rect[1]:
+                self.rect[2] -= degree
+                self.rect[3] -= degree
+                speed[0] += 1.5
+                self.rect = self.rect.move(speed)
 
         wait = 16
-
         if speed[1] != 0:
             if speed[1] > 0:
                 if footprint % wait == 0:
@@ -138,6 +151,8 @@ class player_class(pygame.sprite.Sprite):
                     self.image = self.images[10]
                 elif footprint % wait == wait / 2:
                     self.image = self.images[11]
+
+        self.image = pygame.transform.scale(self.image, [self.rect.width, self.rect.height])
 
 
 class shen_class(pygame.sprite.Sprite):
@@ -206,6 +221,7 @@ if __name__ == '__main__':
     playground_surface = pygame.transform.scale(pygame.image.load("playground.jpg"), (width, height))
     playground_surface2 = pygame.transform.scale(pygame.image.load("playground2.jpg"), (width, height))
     classroom_surface = pygame.transform.scale(pygame.image.load("classroom.jpg"), (width, height))
+    desk_surface = pygame.transform.scale(pygame.image.load("classroom desk.png"), (width, height))
 
     background = {"walking": playground_surface,
                   "shen is running": playground_surface,
@@ -273,6 +289,9 @@ if __name__ == '__main__':
 
             screen.blit(shen.image, shen.rect)  # shen显示
             screen.blit(player.image, player.rect)  # 玩家显示
+
+            if game_progress == "find medicine c":
+                screen.blit(desk_surface, [0, 0])
 
             if not if_mouse_bottom_down:
                 down_to_continue = little.render("单击鼠标以继续", True, (0, 0, 0))
