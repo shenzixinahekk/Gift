@@ -116,15 +116,21 @@ class player_class(pygame.sprite.Sprite):
 
         elif game_progress == "find medicine c":
             degree = 1
-            if speed[1] > 0 and self.rect[1] < height - self.rect[3] + 20:
+            if speed[1] > 0 and self.rect[1] < height - self.rect[3] + 50 and 200 < self.rect[0] \
+                    and self.rect.left + (self.rect.top - 300) / 2 < 320:
                 self.rect[2] += degree
                 self.rect[3] += degree
-                speed[0] -= 1.5
+                speed[0] -= 1
                 self.rect = self.rect.move(speed)
-            elif speed[1] < 0 and 300 < self.rect[1]:
+            elif speed[1] < 0 and 300 < self.rect[1] and 200 < self.rect[0] \
+                    and self.rect.left + (self.rect.top - 300) / 2 < 320:
                 self.rect[2] -= degree
                 self.rect[3] -= degree
-                speed[0] += 1.5
+                speed[0] += 1
+                self.rect = self.rect.move(speed)
+            elif speed[0] > 0 and self.rect[0] < width - self.rect[2] and self.rect.top > 440:
+                self.rect = self.rect.move(speed)
+            elif speed[0] < 0 < self.rect[0] and self.rect.top > 440:
                 self.rect = self.rect.move(speed)
 
         wait = 16
@@ -192,6 +198,8 @@ if __name__ == '__main__':
 
     if_mouse_bottom_down = True
     wait_for_mouse = False
+    check_this_bag = False
+    open_this_bag = False
 
     width, height = 800, 600
     fps = 30
@@ -222,6 +230,9 @@ if __name__ == '__main__':
     playground_surface2 = pygame.transform.scale(pygame.image.load("playground2.jpg"), (width, height))
     classroom_surface = pygame.transform.scale(pygame.image.load("classroom.jpg"), (width, height))
     desk_surface = pygame.transform.scale(pygame.image.load("classroom desk.png"), (width, height))
+    classroom_schoolbag_surface = pygame.transform.scale(pygame.image.load("classroom schoolbag.png"), (width, height))
+    check_this_bag_surface = pygame.image.load("check this bag.png")
+    schoolbag_yellow_surface = pygame.image.load("schoolbag_yellow.png")
 
     background = {"walking": playground_surface,
                   "shen is running": playground_surface,
@@ -252,6 +263,10 @@ if __name__ == '__main__':
                         player.move([-2, 0])
                     elif event.key == pygame.K_RIGHT:
                         player.move([2, 0])
+
+                if check_this_bag:
+                    if event.key == pygame.K_SPACE:
+                        open_this_bag = True
 
         screen.blit(background[game_progress], (0, 0))
         if if_mouse_bottom_down:
@@ -287,11 +302,24 @@ if __name__ == '__main__':
                     footprint = 0
                     allow_self_move = True
 
+            if game_progress == "find medicine c" and player.rect.top > 420 and 105 < player.rect.left < 293:
+                screen.blit(classroom_schoolbag_surface, [0, 0])
+
             screen.blit(shen.image, shen.rect)  # shen显示
             screen.blit(player.image, player.rect)  # 玩家显示
 
-            if game_progress == "find medicine c":
+            if game_progress == "find medicine c" and player.rect.top <= 440:  # 大面积桌子遮挡
                 screen.blit(desk_surface, [0, 0])
+
+            if game_progress == "find medicine c" and player.rect.top > 420 and 105 < player.rect.left < 293:
+                # 查看shen的书包
+                screen.blit(check_this_bag_surface, [player.rect.left + 170, player.rect.top + 70])
+                check_this_bag = True
+
+            if open_this_bag:
+                wait_for_mouse = True
+                if_mouse_bottom_down = False
+                screen.blit(schoolbag_yellow_surface, [150, 25])
 
             if not if_mouse_bottom_down:
                 down_to_continue = little.render("单击鼠标以继续", True, (0, 0, 0))
