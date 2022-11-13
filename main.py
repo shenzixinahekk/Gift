@@ -13,7 +13,12 @@ def shen_is_running():
     global screen
     player.move([1, 1])
     shen.move([-2, 1])
-    screen.blit(shen.image, shen.rect)
+
+    wait = 16
+    if footprint % wait == 0:
+        shen.image = shen.images[2]
+    elif footprint % wait == wait / 2:
+        shen.image = shen.images[3]
 
 
 def shen_is_dying():
@@ -28,8 +33,8 @@ def shen_is_dying():
     elif 30 < footprint < 60:
         shen.move([-1, 0])
     elif footprint == 60:
-        box_appear("啊!", large, 's')
-        screen.blit(little.render("(痛苦的喊叫)", True, (0, 0, 0)), [140, 565])
+        box_appear("啊!", large, 'n')
+        screen.blit(little.render("(痛苦的喊叫)", True, (0, 0, 0)), [140, 555])
 
 
 def say_help():
@@ -46,7 +51,7 @@ def say_help():
         text = little.render("那是......", True, (0, 0, 0))
         screen.blit(text, [30, 500])
     elif footprint == 31:
-        box_appear("!", middle, 'h')
+        box_appear("沈子昕!", middle, 'h')
     elif footprint <= 60:
         player.move([4, 0])
     elif footprint == 61:
@@ -59,7 +64,7 @@ def say_help():
         box_appear("现在似乎发作了", little, 's')
     elif footprint == 65:
         box_appear("啊!", large, 's')
-        screen.blit(little.render("(又是痛苦的喊叫)", True, (0, 0, 0)), [140, 565])
+        screen.blit(little.render("(又是痛苦的喊叫)", True, (0, 0, 0)), [140, 555])
     elif footprint == 66:
         box_appear("你能不能帮我回教室拿一下药", little, 's')
     elif footprint == 67:
@@ -234,10 +239,18 @@ def box_appear(t, size, p):
     screen.blit(dialog_box, [0, 450])
     if p == "s":
         screen.blit(little.render("沈:", True, (0, 0, 0)), [20, 470])
-    else:
+    elif p == "h":
         screen.blit(little.render("胡:", True, (0, 0, 0)), [20, 470])
+    else:
+        screen.blit(little.render("某人:", True, (0, 0, 0)), [20, 470])
     text = size.render(t, True, (0, 0, 0))
     screen.blit(text, [30, 500])
+
+
+def stand():
+    if player.image_style % 3 != 0:
+        player.image_style = player.image_style // 3 * 3 + 3
+    player.image = player.images[player.image_style]
 
 
 class player_class(pygame.sprite.Sprite):
@@ -248,6 +261,7 @@ class player_class(pygame.sprite.Sprite):
         for i in range(1, 13):
             self.images.append(pygame.transform.scale(pygame.image.load("p" + str(i) + ".png"), (90, 110)))
         self.image = self.images[1]
+        self.image_style = 1
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
 
@@ -301,27 +315,33 @@ class player_class(pygame.sprite.Sprite):
             if speed[1] > 0:
                 if footprint % wait == 0:
                     self.image = self.images[1]
+                    self.image_style = 1
                 elif footprint % wait == wait / 2:
                     self.image = self.images[2]
+                    self.image_style = 2
             else:
                 if footprint % wait == 0:
                     self.image = self.images[4]
+                    self.image_style = 4
                 elif footprint % wait == wait / 2:
                     self.image = self.images[5]
+                    self.image_style = 5
 
         else:
             if speed[0] < 0:
                 if footprint % wait == 0:
                     self.image = self.images[7]
+                    self.image_style = 7
                 elif footprint % wait == wait / 2:
                     self.image = self.images[8]
+                    self.image_style = 8
             else:
                 if footprint % wait == 0:
                     self.image = self.images[10]
+                    self.image_style = 10
                 elif footprint % wait == wait / 2:
                     self.image = self.images[11]
-
-        self.image = pygame.transform.scale(self.image, [self.rect.width, self.rect.height])
+                    self.image_style = 11
 
 
 class shen_class(pygame.sprite.Sprite):
@@ -446,6 +466,8 @@ if __name__ == '__main__':
                         player.rect.left = 800
                         allow_self_move = False
                         check_the_podium = False
+            if event.type == pygame.KEYUP:
+                stand()
 
         screen.blit(background[game_progress], (0, 0))
 
@@ -509,6 +531,8 @@ if __name__ == '__main__':
                 find_shen()
 
             screen.blit(shen.image, shen.rect)  # shen显示
+
+            player.image = pygame.transform.scale(player.image, [player.rect.width, player.rect.height])
             screen.blit(player.image, player.rect)  # 玩家显示
 
             if (game_progress == "find medicine c" or game_progress == "find password") and player.rect.top <= 440:
@@ -527,7 +551,7 @@ if __name__ == '__main__':
 
             if not if_mouse_bottom_down:
                 down_to_continue = little.render("单击鼠标以继续", True, (0, 0, 0))
-                screen.blit(down_to_continue, (635, 570))
+                screen.blit(down_to_continue, (635, 560))
 
             pygame.display.flip()  # 刷新
 
