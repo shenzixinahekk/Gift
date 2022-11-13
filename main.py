@@ -71,6 +71,19 @@ def say_help():
         wait_for_mouse = True
 
 
+def get_the_medicine():
+    if footprint == 1:
+        box_appear("...", little, 'h')
+    elif footprint == 2:
+        box_appear("这是...", little, 'h')
+    elif footprint == 3:
+        box_appear("药！", middle, 'h')
+    elif footprint == 4:
+        box_appear("但，为什么上面有一个锁啊?", little, 'h')
+    elif footprint == 5:
+        box_appear("哎，药瓶上好像有他的字", little, 'h')
+
+
 def box_appear(t, size, p):
     global screen, if_mouse_bottom_down, wait_for_mouse
     if_mouse_bottom_down = False
@@ -104,7 +117,7 @@ class player_class(pygame.sprite.Sprite):
             player.rect[0] = 315
             player.rect[1] = 300
 
-        if game_progress != "find medicine c":
+        if game_progress != "find medicine c" and game_progress != "find password":
             if speed[0] > 0 and self.rect[0] < width - self.rect[2]:
                 self.rect = self.rect.move(speed)
             elif speed[0] < 0 < self.rect[0]:
@@ -114,7 +127,7 @@ class player_class(pygame.sprite.Sprite):
             elif speed[1] < 0 < self.rect[1]:
                 self.rect = self.rect.move(speed)
 
-        elif game_progress == "find medicine c":
+        elif game_progress == "find medicine c" or game_progress == "find password":
             degree = 1
             if speed[1] > 0 and self.rect[1] < height - self.rect[3] + 50 and 200 < self.rect[0] \
                     and self.rect.left + (self.rect.top - 300) / 2 < 320:
@@ -199,11 +212,11 @@ if __name__ == '__main__':
     if_mouse_bottom_down = True
     wait_for_mouse = False
     check_this_bag = False
-    open_this_bag = False
 
     width, height = 800, 600
     fps = 30
     footprint = 0
+    before = 0
 
     f = open("game progress.txt", "r")
     game_progress = f.readline()[:-1]  # 游戏进程
@@ -233,13 +246,16 @@ if __name__ == '__main__':
     classroom_schoolbag_surface = pygame.transform.scale(pygame.image.load("classroom schoolbag.png"), (width, height))
     check_this_bag_surface = pygame.image.load("check this bag.png")
     schoolbag_yellow_surface = pygame.image.load("schoolbag_yellow.png")
+    see_see_surface = pygame.image.load("see see.png")
 
     background = {"walking": playground_surface,
                   "shen is running": playground_surface,
                   "shen is dying": playground_surface,
                   "say help": playground_surface,
                   "find medicine p": playground_surface2,
-                  "find medicine c": classroom_surface
+                  "find medicine c": classroom_surface,
+                  "get the medicine": classroom_surface,
+                  "find password": classroom_surface
                   }
 
     screen = pygame.display.set_mode((width, height))
@@ -266,13 +282,20 @@ if __name__ == '__main__':
 
                 if check_this_bag:
                     if event.key == pygame.K_SPACE:
-                        open_this_bag = True
+                        game_progress = "get the medicine"
+                        footprint = 0
+                        before = player.rect[0]
+                        player.rect.left = 800
+                        allow_self_move = False
+                        check_this_bag = False
 
         screen.blit(background[game_progress], (0, 0))
+
         if if_mouse_bottom_down:
             footprint += 1
             if footprint == 800:
                 footprint = 0
+
             if game_progress == "walking":
                 player.move([1, 1])
 
@@ -302,8 +325,22 @@ if __name__ == '__main__':
                     footprint = 0
                     allow_self_move = True
 
-            if game_progress == "find medicine c" and player.rect.top > 420 and 105 < player.rect.left < 293:
+            elif game_progress == "find medicine c" and player.rect.top > 420 and 105 < player.rect.left < 293:
                 screen.blit(classroom_schoolbag_surface, [0, 0])
+            elif game_progress == "get the medicine":
+                if footprint <= 5:
+                    screen.blit(schoolbag_yellow_surface, [150, 25])
+                elif footprint == 6:
+                    screen.blit(see_see_surface, [0, 25])
+                    wait_for_mouse = True
+                    if_mouse_bottom_down = False
+                get_the_medicine()
+
+                if footprint == 7:
+                    game_progress = "find password"
+                    footprint = 0
+                    allow_self_move = True
+                    player.rect.left = before
 
             screen.blit(shen.image, shen.rect)  # shen显示
             screen.blit(player.image, player.rect)  # 玩家显示
@@ -312,18 +349,14 @@ if __name__ == '__main__':
                 screen.blit(desk_surface, [0, 0])
 
             if game_progress == "find medicine c" and player.rect.top > 420 and 105 < player.rect.left < 293:
-                # 查看shen的书包
+                # 查看shen的书包的提示
                 screen.blit(check_this_bag_surface, [player.rect.left + 170, player.rect.top + 70])
                 check_this_bag = True
-
-            if open_this_bag:
-                wait_for_mouse = True
-                if_mouse_bottom_down = False
-                screen.blit(schoolbag_yellow_surface, [150, 25])
 
             if not if_mouse_bottom_down:
                 down_to_continue = little.render("单击鼠标以继续", True, (0, 0, 0))
                 screen.blit(down_to_continue, (635, 570))
 
             pygame.display.flip()  # 刷新
+
         clock.tick(fps)  # 控制帧率
