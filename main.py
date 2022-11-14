@@ -428,6 +428,8 @@ if __name__ == '__main__':
                   "find shen": playground_surface
                   }
 
+    pygame.display.set_caption("送给你的生日礼物")
+    pygame.display.set_icon(pygame.image.load("tb.ico"))
     screen = pygame.display.set_mode((width, height))
     pygame.display.flip()
 
